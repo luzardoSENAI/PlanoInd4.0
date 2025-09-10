@@ -1,0 +1,542 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Plano de Aula Interativo: Indústria 4.0</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Warm Neutrals & Slate Blue -->
+    <!-- Application Structure Plan: The application is designed as a single-page dashboard with a fixed sidebar navigation. This structure was chosen for its clarity and ease of access, allowing the user (a SENAI teacher) to seamlessly switch between different components of the learning package (Overview, Lesson Plan, Materials, AI Prompt, Reflection) without losing context. The main content area dynamically displays the selected section. This task-oriented approach prioritizes the user flow of a teacher who might first want a high-level overview, then drill down into specific lesson details, access materials for that lesson, and finally review the creation process (prompt and reflection). Interactions like accordions for the lesson plan and modals for materials prevent information overload and keep the interface clean. -->
+    <!-- Visualization & Content Choices: 
+        1. Overview: Report Info: Course structure (16h, 4 modules). Goal: Inform. Viz/Presentation: Donut Chart showing equal 25% time allocation per module & key metric cards. Interaction: Hover on chart segments. Justification: Provides an immediate, digestible summary of the course's scope. Library/Method: Chart.js (Canvas).
+        2. Lesson Plan: Report Info: Detailed 16-hour plan. Goal: Organize. Viz/Presentation: Interactive Accordion. Interaction: Click to expand/collapse each 4-hour session. Justification: Allows teachers to focus on a specific class without being overwhelmed by the full 16-hour plan. Library/Method: HTML/Tailwind + Vanilla JS.
+        3. Materials: Report Info: Slides, links, extra content. Goal: Organize/Inform. Viz/Presentation: Grid of cards. Interaction: Click to open a modal with content (including a simple slide viewer). Justification: A clean, visual way to browse and access diverse resources without leaving the page. Library/Method: HTML/Tailwind + Vanilla JS.
+        4. AI Prompt: Report Info: The prompt used. Goal: Inform/Enable. Viz/Presentation: Styled code block with a copy button. Interaction: Click to copy prompt to clipboard. Justification: Provides transparency and makes the tool easily reusable. Library/Method: HTML/Tailwind + Vanilla JS.
+        5. Reflection: Report Info: Essay on responsible AI use. Goal: Inform. Viz/Presentation: Formatted text. Interaction: None. Justification: Standard text is best for readability. Library/Method: HTML/Tailwind. -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8f7f4;
+        }
+        .active-nav {
+            background-color: #4a5568;
+            color: #ffffff;
+        }
+        .nav-item {
+            transition: all 0.2s ease-in-out;
+        }
+        .nav-item:hover {
+            background-color: #2d3748;
+            color: #ffffff;
+        }
+        .modal-backdrop {
+            background-color: rgba(0, 0, 0, 0.5);
+        }
+        .accordion-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease-out;
+        }
+        .slide { display: none; }
+        .slide.active { display: block; }
+    </style>
+</head>
+<body class="text-gray-800">
+
+    <div class="flex min-h-screen">
+        <aside class="w-64 bg-gray-800 text-white flex flex-col fixed h-full">
+            <div class="h-20 flex items-center justify-center bg-gray-900">
+                <h1 class="text-xl font-bold text-center">Plano de Aula SENAI</h1>
+            </div>
+            <nav class="flex-1 px-4 py-6 space-y-2">
+                <a href="#visao-geral" class="nav-item active-nav flex items-center px-4 py-2 rounded-md">
+                    <span class="mr-3">📊</span> Visão Geral
+                </a>
+                <a href="#plano-de-aula" class="nav-item flex items-center px-4 py-2 rounded-md">
+                    <span class="mr-3">🗓️</span> Plano de Aula
+                </a>
+                <a href="#materiais" class="nav-item flex items-center px-4 py-2 rounded-md">
+                    <span class="mr-3">📚</span> Materiais Didáticos
+                </a>
+                <a href="#ferramenta-ia" class="nav-item flex items-center px-4 py-2 rounded-md">
+                    <span class="mr-3">🤖</span> Ferramenta de IA
+                </a>
+                <a href="#reflexao" class="nav-item flex items-center px-4 py-2 rounded-md">
+                    <span class="mr-3">💡</span> Reflexão
+                </a>
+            </nav>
+        </aside>
+
+        <main class="ml-64 flex-1 p-6 sm:p-8 md:p-10 bg-gray-100">
+            <section id="visao-geral" class="content-section">
+                <h2 class="text-3xl font-bold text-gray-700 mb-2">Visão Geral do Curso: Indústria 4.0</h2>
+                <p class="mb-8 text-gray-600">Este painel interativo apresenta um plano de aula completo de 16 horas sobre Indústria 4.0, alinhado à Metodologia SENAI de Educação Profissional. O objetivo é fornecer um recurso didático robusto para otimizar o tempo de planejamento do docente, integrando tecnologias e estratégias de ensino ativas.</p>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                    <div class="bg-white p-6 rounded-lg shadow-md flex items-center">
+                        <span class="text-4xl mr-4">⏱️</span>
+                        <div>
+                            <p class="text-gray-500">Carga Horária</p>
+                            <p class="text-2xl font-bold">16 Horas</p>
+                        </div>
+                    </div>
+                    <div class="bg-white p-6 rounded-lg shadow-md flex items-center">
+                        <span class="text-4xl mr-4">🧩</span>
+                        <div>
+                            <p class="text-gray-500">Módulos</p>
+                            <p class="text-2xl font-bold">4 Módulos</p>
+                        </div>
+                    </div>
+                    <div class="bg-white p-6 rounded-lg shadow-md flex items-center">
+                        <span class="text-4xl mr-4">🎯</span>
+                        <div>
+                            <p class="text-gray-500">Foco</p>
+                            <p class="text-2xl font-bold">Teoria e Prática</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white p-6 rounded-lg shadow-md">
+                    <h3 class="text-xl font-bold text-gray-700 mb-4">Distribuição da Carga Horária por Módulo</h3>
+                    <p class="text-gray-600 mb-4">O curso é dividido igualmente em quatro módulos de 4 horas, garantindo uma cobertura equilibrada dos fundamentos às aplicações práticas. Passe o mouse sobre as seções do gráfico para ver os detalhes de cada módulo.</p>
+                    <div class="chart-container" style="position: relative; height: 40vh; max-height: 400px; width: 100%; max-width: 400px; margin: auto;">
+                        <canvas id="distribuicaoCargaHorariaChart"></canvas>
+                    </div>
+                </div>
+            </section>
+
+            <section id="plano-de-aula" class="content-section hidden">
+                 <h2 class="text-3xl font-bold text-gray-700 mb-2">Plano de Aula Detalhado</h2>
+                <p class="mb-8 text-gray-600">Explore a estrutura de 16 horas, dividida em quatro encontros. Cada seção detalha os objetivos, conteúdos e estratégias pedagógicas, seguindo a abordagem por competências da Metodologia SENAI. Clique em cada aula para expandir e ver os detalhes.</p>
+                <div class="space-y-4 accordion-container">
+                    <div class="accordion-item bg-white rounded-lg shadow-md">
+                        <button class="accordion-header w-full text-left p-6 flex justify-between items-center">
+                            <h3 class="text-xl font-bold text-slate-700">Aula 1 (4h): Fundamentos da Indústria 4.0</h3>
+                            <span class="transform transition-transform duration-300">▼</span>
+                        </button>
+                        <div class="accordion-content">
+                            <div class="p-6 border-t border-gray-200">
+                                <p><strong>Situação de Aprendizagem:</strong> "Desvendando a Nova Revolução Industrial".</p>
+                                <ul class="list-disc list-inside mt-4 space-y-2 text-gray-600">
+                                    <li><strong>Objetivos:</strong> Compreender o conceito de Indústria 4.0, seus pilares e o contexto histórico. Identificar as principais tecnologias habilitadoras.</li>
+                                    <li><strong>Conteúdos:</strong> Evolução das revoluções industriais; Os 9 pilares da Indústria 4.0 (Big Data, Robôs Autônomos, Simulação, etc.); Conceitos de Sistemas Ciber-Físicos (CPS).</li>
+                                    <li><strong>Estratégias:</strong> Aula expositiva dialogada com uso de recursos visuais. Atividade de brainstorming em grupo sobre os impactos da I4.0 no cotidiano.</li>
+                                    <li><strong>Recursos:</strong> Projetor, slides, quadro branco, vídeos curtos sobre o tema.</li>
+                                    <li><strong>Avaliação:</strong> Diagnóstica, por meio da participação no debate e na atividade de brainstorming.</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="accordion-item bg-white rounded-lg shadow-md">
+                        <button class="accordion-header w-full text-left p-6 flex justify-between items-center">
+                            <h3 class="text-xl font-bold text-slate-700">Aula 2 (4h): Tecnologias Habilitadoras</h3>
+                            <span class="transform transition-transform duration-300">▼</span>
+                        </button>
+                        <div class="accordion-content">
+                             <div class="p-6 border-t border-gray-200">
+                                <p><strong>Situação de Aprendizagem:</strong> "Conectando o Mundo Físico e Digital".</p>
+                                <ul class="list-disc list-inside mt-4 space-y-2 text-gray-600">
+                                    <li><strong>Objetivos:</strong> Detalhar o funcionamento da Internet das Coisas (IoT), Big Data & Analytics e Computação em Nuvem. Relacionar como essas tecnologias se integram.</li>
+                                    <li><strong>Conteúdos:</strong> Sensores e atuadores (IoT); Coleta, armazenamento e processamento de grandes volumes de dados (Big Data); Modelos de serviço em nuvem (IaaS, PaaS, SaaS).</li>
+                                    <li><strong>Estratégias:</strong> Sala de aula invertida (leitura prévia indicada). Resolução de um estudo de caso em pequenos grupos: "Como uma fábrica de calçados pode usar IoT e Big Data para reduzir perdas?".</li>
+                                    <li><strong>Recursos:</strong> Material de leitura, estudo de caso impresso, acesso à internet para pesquisa.</li>
+                                    <li><strong>Avaliação:</strong> Formativa, pela qualidade da análise e soluções propostas para o estudo de caso.</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="accordion-item bg-white rounded-lg shadow-md">
+                        <button class="accordion-header w-full text-left p-6 flex justify-between items-center">
+                            <h3 class="text-xl font-bold text-slate-700">Aula 3 (4h): Inteligência Artificial e Aplicações Práticas</h3>
+                            <span class="transform transition-transform duration-300">▼</span>
+                        </button>
+                        <div class="accordion-content">
+                            <div class="p-6 border-t border-gray-200">
+                                <p><strong>Situação de Aprendizagem:</strong> "A Indústria que Pensa".</p>
+                                <ul class="list-disc list-inside mt-4 space-y-2 text-gray-600">
+                                    <li><strong>Objetivos:</strong> Introduzir os conceitos de Inteligência Artificial e Machine Learning. Analisar aplicações práticas como Manufatura Aditiva e Robótica Avançada.</li>
+                                    <li><strong>Conteúdos:</strong> Tipos de IA; Aprendizagem supervisionada e não supervisionada; Impressão 3D (prototipagem e produção); Robôs colaborativos (cobots).</li>
+                                    <li><strong>Estratégias:</strong> Demonstração prática (se houver impressora 3D disponível) ou vídeos de demonstração. Atividade de "Design Thinking" para idealizar um novo produto usando manufatura aditiva.</li>
+                                    <li><strong>Recursos:</strong> Impressora 3D (opcional), vídeos de cases industriais, material para prototipagem (papel, canetas).</li>
+                                    <li><strong>Avaliação:</strong> Formativa, pela criatividade e viabilidade da solução proposta na atividade de Design Thinking.</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                     <div class="accordion-item bg-white rounded-lg shadow-md">
+                        <button class="accordion-header w-full text-left p-6 flex justify-between items-center">
+                            <h3 class="text-xl font-bold text-slate-700">Aula 4 (4h): Desafios, Futuro e Projeto Integrador</h3>
+                            <span class="transform transition-transform duration-300">▼</span>
+                        </button>
+                        <div class="accordion-content">
+                            <div class="p-6 border-t border-gray-200">
+                                <p><strong>Situação de Aprendizagem:</strong> "Construindo o Futuro da Indústria".</p>
+                                <ul class="list-disc list-inside mt-4 space-y-2 text-gray-600">
+                                    <li><strong>Objetivos:</strong> Discutir os desafios da Indústria 4.0 (cibersegurança, qualificação profissional). Desenvolver um mini-projeto aplicando os conceitos aprendidos.</li>
+                                    <li><strong>Conteúdos:</strong> Segurança da informação na I4.0; O profissional do futuro e novas competências; Ética e impactos sociais.</li>
+                                    <li><strong>Estratégias:</strong> Debate regrado sobre os desafios. Desenvolvimento, em equipes, de um pitch de 5 minutos propondo uma solução baseada em I4.0 para um problema real de uma indústria local/regional.</li>
+                                    <li><strong>Recursos:</strong> Notícias e artigos sobre os temas. Template para elaboração do pitch.</li>
+                                    <li><strong>Avaliação:</strong> Somativa, através da apresentação do pitch do projeto, avaliando a aplicação dos conceitos, clareza e argumentação.</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="materiais" class="content-section hidden">
+                <h2 class="text-3xl font-bold text-gray-700 mb-2">Materiais Didáticos de Apoio</h2>
+                <p class="mb-8 text-gray-600">Aqui você encontra uma seleção de recursos para enriquecer suas aulas. São slides, vídeos e artigos complementares para cada módulo do curso. Clique em um material para visualizá-lo.</p>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <div class="material-card bg-white p-6 rounded-lg shadow-md cursor-pointer hover:shadow-xl transition-shadow" data-type="slides" data-content="aula1">
+                        <p class="text-3xl mb-3">🖥️</p>
+                        <h3 class="font-bold text-lg text-slate-700">Slides: Aula 1</h3>
+                        <p class="text-gray-600">Apresentação sobre os Fundamentos da Indústria 4.0.</p>
+                    </div>
+                     <div class="material-card bg-white p-6 rounded-lg shadow-md cursor-pointer hover:shadow-xl transition-shadow" data-type="link" data-content="https://www.youtube.com/watch?v=f-D-V_2s1-s">
+                        <p class="text-3xl mb-3">▶️</p>
+                        <h3 class="font-bold text-lg text-slate-700">Vídeo: O que é Indústria 4.0?</h3>
+                        <p class="text-gray-600">Vídeo explicativo do canal "Nerdologia" (YouTube).</p>
+                    </div>
+                    <div class="material-card bg-white p-6 rounded-lg shadow-md cursor-pointer hover:shadow-xl transition-shadow" data-type="slides" data-content="aula2">
+                        <p class="text-3xl mb-3">🖥️</p>
+                        <h3 class="font-bold text-lg text-slate-700">Slides: Aula 2</h3>
+                        <p class="text-gray-600">Apresentação sobre IoT, Big Data e Cloud.</p>
+                    </div>
+                    <div class="material-card bg-white p-6 rounded-lg shadow-md cursor-pointer hover:shadow-xl transition-shadow" data-type="article" data-content="artigo1">
+                        <p class="text-3xl mb-3">📄</p>
+                        <h3 class="font-bold text-lg text-slate-700">Artigo: O Profissional 4.0</h3>
+                        <p class="text-gray-600">Leitura sobre as competências para o futuro do trabalho.</p>
+                    </div>
+                    <div class="material-card bg-white p-6 rounded-lg shadow-md cursor-pointer hover:shadow-xl transition-shadow" data-type="slides" data-content="aula3_4">
+                        <p class="text-3xl mb-3">🖥️</p>
+                        <h3 class="font-bold text-lg text-slate-700">Slides: Aulas 3 e 4</h3>
+                        <p class="text-gray-600">Apresentação sobre IA, Aplicações e Desafios.</p>
+                    </div>
+                    <div class="material-card bg-white p-6 rounded-lg shadow-md cursor-pointer hover:shadow-xl transition-shadow" data-type="glossary" data-content="glossario1">
+                        <p class="text-3xl mb-3">📖</p>
+                        <h3 class="font-bold text-lg text-slate-700">Glossário da Indústria 4.0</h3>
+                        <p class="text-gray-600">Principais termos e definições do universo da I4.0.</p>
+                    </div>
+                </div>
+            </section>
+
+            <section id="ferramenta-ia" class="content-section hidden">
+                <h2 class="text-3xl font-bold text-gray-700 mb-2">Documentação do Prompt de IA</h2>
+                <p class="mb-8 text-gray-600">Para a criação deste plano de aula, foi utilizada uma Inteligência Artificial generativa com o seguinte prompt. O objetivo é demonstrar como uma instrução bem elaborada pode gerar resultados de alta qualidade, servindo como um ponto de partida para o docente, que deve sempre revisar, adaptar e validar o conteúdo.</p>
+                <div class="bg-gray-900 text-white p-6 rounded-lg shadow-md">
+                    <div class="flex justify-between items-start">
+                        <h3 class="text-xl font-bold text-green-400 mb-4 font-mono">Prompt Utilizado</h3>
+                        <button id="copy-prompt-btn" class="bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600 transition-colors text-sm">Copiar</button>
+                    </div>
+                    <pre><code id="prompt-text" class="text-sm whitespace-pre-wrap">Atue como um especialista em Design Educacional e Metodologia SENAI de Educação Profissional. Sua tarefa é criar um plano de aula completo para um curso de 16 horas sobre "Indústria 4.0".
+
+O plano deve ser dividido em 4 aulas de 4 horas cada.
+
+Para cada aula, detalhe os seguintes itens:
+1.  **Situação de Aprendizagem:** Crie um nome criativo e contextualizado para o desafio central da aula.
+2.  **Objetivos de Aprendizagem:** Liste o que o aluno será capaz de fazer ao final da aula.
+3.  **Conteúdos:** Especifique os tópicos e conceitos a serem abordados.
+4.  **Estratégias Didáticas:** Sugira métodos ativos de ensino-aprendizagem (ex: sala de aula invertida, estudo de caso, gamificação, design thinking).
+5.  **Recursos Necessários:** Liste os materiais e tecnologias para a aula.
+6.  **Forma de Avaliação:** Descreva como a aprendizagem será avaliada (diagnóstica, formativa, somativa), conectando com a estratégia didática.
+
+Adicionalmente, elabore um resumo para 3 materiais didáticos que apoiariam este curso: uma apresentação de slides, um vídeo externo relevante e um artigo para leitura complementar.
+
+O público-alvo são estudantes de cursos técnicos do SENAI. A linguagem deve ser clara, objetiva e alinhada à prática industrial.</code></pre>
+                </div>
+            </section>
+
+            <section id="reflexao" class="content-section hidden">
+                <h2 class="text-3xl font-bold text-gray-700 mb-2">Reflexão sobre o Uso Consciente de IA na Educação</h2>
+                <p class="mb-6 text-gray-600">A incorporação de Inteligências Artificiais generativas no planejamento pedagógico representa uma oportunidade de otimização e inovação. No entanto, seu uso demanda uma abordagem crítica, consciente e responsável por parte do docente.</p>
+                <div class="bg-white p-8 rounded-lg shadow-md space-y-4 text-gray-700 leading-relaxed">
+                    <div>
+                        <h3 class="font-bold text-lg mb-2">A IA como Ferramenta de Apoio, Não como Substituta</h3>
+                        <p>A IA deve ser vista como uma assistente de alta performance, capaz de acelerar a criação de rascunhos, estruturar ideias e sugerir abordagens. Ela pode gerar um plano de aula como este em minutos, uma tarefa que levaria horas. Contudo, a validação pedagógica, a adequação ao contexto da turma, à cultura local e à infraestrutura da escola é uma atribuição intransferível do professor. A sensibilidade humana e a experiência em sala de aula são essenciais para refinar o material bruto gerado pela IA, garantindo que ele seja verdadeiramente eficaz e inclusivo.</p>
+                    </div>
+                    <div>
+                        <h3 class="font-bold text-lg mb-2">Curadoria e Verificação da Informação</h3>
+                        <p>As IAs, apesar de avançadas, podem cometer erros, gerar informações desatualizadas ou até mesmo apresentar vieses contidos em seus dados de treinamento. É responsabilidade do docente atuar como curador do conhecimento, verificando a precisão de cada dado, conceito e fonte sugerida. O uso de IA não elimina a necessidade de pesquisa e planejamento; ele a transforma, focando o esforço do professor em atividades de maior valor agregado, como a análise crítica e a personalização do ensino.</p>
+                    </div>
+                    <blockquote class="border-l-4 border-slate-500 pl-4 py-2 my-4 bg-slate-50">
+                        <p class="font-semibold">"A tecnologia é uma ferramenta. Em termos de levar as crianças a trabalhar juntas e motivá-las, o professor é o mais importante." - Bill Gates</p>
+                    </blockquote>
+                    <div>
+                        <h3 class="font-bold text-lg mb-2">Ética e Transparência</h3>
+                        <p>Ao utilizar materiais gerados ou auxiliados por IA, é uma boa prática ser transparente sobre o processo, tanto para a gestão pedagógica quanto, em alguns contextos, para os próprios alunos. Isso fomenta uma cultura de honestidade intelectual e abre espaço para discussões importantes sobre o futuro do trabalho e da criação de conhecimento na era digital. Utilizar a IA de forma consciente é, portanto, equilibrar a eficiência tecnológica com a sabedoria pedagógica, mantendo o professor como o arquiteto central da experiência de aprendizagem.</p>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <div id="material-modal" class="fixed inset-0 z-50 items-center justify-center hidden modal-backdrop">
+        <div class="bg-white rounded-lg shadow-2xl w-11/12 md:w-3/4 lg:w-1/2 max-h-[90vh] overflow-y-auto flex flex-col">
+            <div class="flex justify-between items-center p-4 border-b">
+                <h3 id="modal-title" class="text-xl font-bold"></h3>
+                <button id="close-modal-btn" class="text-2xl">&times;</button>
+            </div>
+            <div id="modal-content" class="p-6 flex-grow">
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const navLinks = document.querySelectorAll('aside nav a');
+            const sections = document.querySelectorAll('.content-section');
+            const accordionHeaders = document.querySelectorAll('.accordion-header');
+            const materialCards = document.querySelectorAll('.material-card');
+            const modal = document.getElementById('material-modal');
+            const closeModalBtn = document.getElementById('close-modal-btn');
+            const copyPromptBtn = document.getElementById('copy-prompt-btn');
+
+            const slideData = {
+                aula1: {
+                    title: 'Slides: Fundamentos da Indústria 4.0',
+                    slides: [
+                        { title: 'Slide 1: O que é Indústria 4.0?', content: '<ul><li>Definição: A integração de tecnologias digitais nos processos industriais.</li><li>Também conhecida como 4ª Revolução Industrial.</li><li>Foco em automação, troca de dados e sistemas ciber-físicos.</li></ul>' },
+                        { title: 'Slide 2: As Revoluções Industriais', content: 'Um breve histórico: <br><strong>1ª:</strong> Vapor e mecanização <br><strong>2ª:</strong> Eletricidade e produção em massa <br><strong>3ª:</strong> Computação e automação <br><strong>4ª:</strong> Sistemas ciber-físicos e redes' },
+                        { title: 'Slide 3: Os 9 Pilares da I4.0', content: 'Big Data, Robôs Autônomos, Simulação, Integração de Sistemas, IoT, Cibersegurança, Cloud Computing, Manufatura Aditiva, Realidade Aumentada.' }
+                    ]
+                },
+                aula2: {
+                    title: 'Slides: Tecnologias Habilitadoras',
+                    slides: [
+                        { title: 'Slide 1: Internet das Coisas (IoT)', content: '<ul><li>Rede de objetos físicos ("coisas") com sensores e software.</li><li>Conectam-se e trocam dados pela internet.</li><li>Exemplo: Sensor de temperatura em uma máquina que envia alertas.</li></ul>' },
+                        { title: 'Slide 2: Big Data & Analytics', content: '<ul><li>Análise de grandes volumes de dados para encontrar padrões e insights.</li><li>Os 5 Vs: Volume, Velocidade, Variedade, Veracidade e Valor.</li><li>Exemplo: Analisar dados de produção para prever falhas.</li></ul>' }
+                    ]
+                },
+                aula3_4: {
+                    title: 'Slides: IA, Aplicações e Desafios',
+                    slides: [
+                        { title: 'Slide 1: Inteligência Artificial (IA) na Indústria', content: '<ul><li>Capacidade de máquinas de "aprender" e tomar decisões.</li><li>Machine Learning: principal ramo da IA usado na indústria.</li><li>Exemplo: Controle de qualidade por visão computacional.</li></ul>' },
+                        { title: 'Slide 2: Manufatura Aditiva (Impressão 3D)', content: '<ul><li>Criação de objetos camada por camada.</li><li>Ideal para protótipos rápidos e peças complexas.</li><li>Reduz desperdício de material.</li></ul>' },
+                        { title: 'Slide 3: Desafios da I4.0', content: '<ul><li><strong>Cibersegurança:</strong> Proteger sistemas conectados.</li><li><strong>Investimento:</strong> Custo de implementação de novas tecnologias.</li><li><strong>Qualificação:</strong> Necessidade de novas competências profissionais.</li></ul>' }
+                    ]
+                }
+            };
+            
+            const articleData = {
+                artigo1: {
+                    title: 'Artigo: O Profissional 4.0',
+                    content: `<p class="mb-4">A quarta revolução industrial não transforma apenas as fábricas, mas também o perfil dos profissionais que nelas atuam. O chamado Profissional 4.0 precisa ir além da competência técnica em sua área de formação.</p><h4 class="font-bold mt-4 mb-2">Principais Competências:</h4><ul class="list-disc list-inside"><li><strong>Resolução de Problemas Complexos:</strong> Habilidade de analisar cenários com múltiplas variáveis e encontrar soluções eficazes.</li><li><strong>Pensamento Crítico:</strong> Capacidade de questionar dados e processos para promover a melhoria contínua.</li><li><strong>Criatividade:</strong> Inovar em produtos, serviços e processos.</li><li><strong>Colaboração e Trabalho em Equipe:</strong> Interagir com equipes multidisciplinares, incluindo a colaboração com robôs (cobots).</li><li><strong>Inteligência Emocional:</strong> Gerir as próprias emoções e entender as dos outros para um ambiente de trabalho saudável.</li><li><strong>Letramento Digital:</strong> Fluência no uso de ferramentas digitais e análise de dados.</li></ul>`
+                }
+            };
+
+            const glossaryData = {
+                glossario1: {
+                    title: 'Glossário da Indústria 4.0',
+                    content: `<ul class="space-y-3">
+                        <li><strong>Sistemas Ciber-Físicos (CPS):</strong> Sistemas que integram componentes físicos (máquinas) com redes digitais (software), permitindo controle e monitoramento remoto e inteligente.</li>
+                        <li><strong>Digital Twin (Gêmeo Digital):</strong> Uma réplica virtual de um processo, produto ou serviço físico. Permite fazer simulações e testes no ambiente digital antes de aplicar no mundo real.</li>
+                        <li><strong>Cobot (Robô Colaborativo):</strong> Robô projetado para trabalhar de forma segura ao lado de seres humanos no mesmo espaço de trabalho.</li>
+                        <li><strong>Edge Computing:</strong> Processamento de dados realizado próximo à fonte onde os dados são gerados (na "borda" da rede), em vez de em um data center centralizado. Reduz a latência.</li>
+                    </ul>`
+                }
+            };
+
+
+            function updateActiveNav(hash) {
+                navLinks.forEach(link => {
+                    link.classList.remove('active-nav');
+                    if (link.getAttribute('href') === hash) {
+                        link.classList.add('active-nav');
+                    }
+                });
+            }
+
+            function showSection(hash) {
+                sections.forEach(section => {
+                    if ('#' + section.id === hash) {
+                        section.classList.remove('hidden');
+                    } else {
+                        section.classList.add('hidden');
+                    }
+                });
+            }
+            
+            navLinks.forEach(link => {
+                link.addEventListener('click', function(e) {
+                    const hash = this.getAttribute('href');
+                    updateActiveNav(hash);
+                    showSection(hash);
+                });
+            });
+
+            accordionHeaders.forEach(header => {
+                header.addEventListener('click', () => {
+                    const content = header.nextElementSibling;
+                    const icon = header.querySelector('span');
+                    
+                    header.parentElement.classList.toggle('open');
+                    icon.classList.toggle('rotate-180');
+
+                    if (content.style.maxHeight) {
+                        content.style.maxHeight = null;
+                    } else {
+                        content.style.maxHeight = content.scrollHeight + "px";
+                    }
+                });
+            });
+
+            function createSlideViewer(data) {
+                let slidesHTML = data.slides.map((slide, index) => `
+                    <div class="slide ${index === 0 ? 'active' : ''}" data-slide-index="${index}">
+                        <h4 class="font-bold text-lg mb-4 text-slate-800">${slide.title}</h4>
+                        <div class="text-gray-700">${slide.content}</div>
+                    </div>
+                `).join('');
+
+                let navigationHTML = `
+                    <div class="flex justify-center items-center mt-6 pt-4 border-t">
+                        <button class="slide-nav-btn bg-slate-600 text-white px-4 py-2 rounded-md hover:bg-slate-700 disabled:opacity-50" data-direction="-1">Anterior</button>
+                        <span class="mx-4 slide-counter">1 / ${data.slides.length}</span>
+                        <button class="slide-nav-btn bg-slate-600 text-white px-4 py-2 rounded-md hover:bg-slate-700 disabled:opacity-50" data-direction="1">Próximo</button>
+                    </div>
+                `;
+
+                return `<div class="slide-viewer">${slidesHTML}${navigationHTML}</div>`;
+            }
+
+            document.body.addEventListener('click', function(e) {
+                const slideNavBtn = e.target.closest('.slide-nav-btn');
+                if (slideNavBtn) {
+                    const viewer = slideNavBtn.closest('.slide-viewer');
+                    const slides = viewer.querySelectorAll('.slide');
+                    const activeSlide = viewer.querySelector('.slide.active');
+                    let currentIndex = parseInt(activeSlide.dataset.slideIndex);
+                    const direction = parseInt(slideNavBtn.dataset.direction);
+                    let nextIndex = currentIndex + direction;
+
+                    if (nextIndex >= 0 && nextIndex < slides.length) {
+                        activeSlide.classList.remove('active');
+                        slides[nextIndex].classList.add('active');
+                        viewer.querySelector('.slide-counter').textContent = `${nextIndex + 1} / ${slides.length}`;
+                    }
+
+                    viewer.querySelectorAll('.slide-nav-btn').forEach(btn => btn.disabled = false);
+                    if (nextIndex === 0) viewer.querySelector('[data-direction="-1"]').disabled = true;
+                    if (nextIndex === slides.length - 1) viewer.querySelector('[data-direction="1"]').disabled = true;
+                }
+            });
+
+
+            materialCards.forEach(card => {
+                card.addEventListener('click', () => {
+                    const type = card.dataset.type;
+                    const contentKey = card.dataset.content;
+                    const modalTitle = document.getElementById('modal-title');
+                    const modalContent = document.getElementById('modal-content');
+
+                    if (type === 'slides') {
+                        const data = slideData[contentKey];
+                        modalTitle.textContent = data.title;
+                        modalContent.innerHTML = createSlideViewer(data);
+                        const viewer = modalContent.querySelector('.slide-viewer');
+                        viewer.querySelector('[data-direction="-1"]').disabled = true;
+                        if (data.slides.length <= 1) {
+                            viewer.querySelector('[data-direction="1"]').disabled = true;
+                        }
+                    } else if (type === 'link') {
+                        window.open(contentKey, '_blank');
+                        return;
+                    } else if (type === 'article') {
+                        const data = articleData[contentKey];
+                        modalTitle.textContent = data.title;
+                        modalContent.innerHTML = data.content;
+                    } else if (type === 'glossary') {
+                        const data = glossaryData[contentKey];
+                        modalTitle.textContent = data.title;
+                        modalContent.innerHTML = data.content;
+                    }
+
+                    modal.classList.remove('hidden');
+                    modal.classList.add('flex');
+                });
+            });
+
+            closeModalBtn.addEventListener('click', () => {
+                modal.classList.add('hidden');
+                modal.classList.remove('flex');
+            });
+            
+            modal.addEventListener('click', (e) => {
+                if(e.target === modal){
+                    modal.classList.add('hidden');
+                    modal.classList.remove('flex');
+                }
+            });
+
+            copyPromptBtn.addEventListener('click', () => {
+                const promptText = document.getElementById('prompt-text').innerText;
+                navigator.clipboard.writeText(promptText).then(() => {
+                    const originalText = copyPromptBtn.textContent;
+                    copyPromptBtn.textContent = 'Copiado!';
+                    copyPromptBtn.classList.add('bg-green-700');
+                    setTimeout(() => {
+                        copyPromptBtn.textContent = originalText;
+                        copyPromptBtn.classList.remove('bg-green-700');
+                    }, 2000);
+                });
+            });
+
+            const initialHash = window.location.hash || '#visao-geral';
+            updateActiveNav(initialHash);
+            showSection(initialHash);
+
+            const ctx = document.getElementById('distribuicaoCargaHorariaChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Módulo 1: Fundamentos', 'Módulo 2: Tecnologias', 'Módulo 3: Aplicações', 'Módulo 4: Projeto'],
+                    datasets: [{
+                        label: 'Carga Horária (horas)',
+                        data: [4, 4, 4, 4],
+                        backgroundColor: [
+                            'rgba(59, 130, 246, 0.7)',
+                            'rgba(16, 185, 129, 0.7)',
+                            'rgba(249, 115, 22, 0.7)',
+                            'rgba(139, 92, 246, 0.7)'
+                        ],
+                        borderColor: [
+                            'rgba(59, 130, 246, 1)',
+                            'rgba(16, 185, 129, 1)',
+                            'rgba(249, 115, 22, 1)',
+                            'rgba(139, 92, 246, 1)'
+                        ],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'top',
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    let label = context.label || '';
+                                    if (label) {
+                                        label += ': ';
+                                    }
+                                    if (context.parsed !== null) {
+                                        label += context.parsed + ' horas';
+                                    }
+                                    return label;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        });
+    </script>
+</body>
+</html>
